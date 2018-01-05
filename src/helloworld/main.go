@@ -11,10 +11,14 @@ func main() {
 	//fmt.Println(euler.AddMultiples([]int{3,5}, 99))
 	//Problem 2
 	//fmt.Println(euler.FibonacciSum(4000000, false))
-
-	fmt.Println(euler.BiggestPrimeFactor(600851475143))
-
+	//Problem 3
+	//factors:=euler.PrimeFactor(600851475143)
+	//fmt.Println(factors[len(factors)-1])
+	//Problem 4
 	//fmt.Println(euler.BiggestPalindromeProduct(3))
-	//fmt.Println(euler.SmallestMultiple(30))
+	//Problem 5
+	fmt.Println(euler.SmallestMultipleV2(20))
+
+	
 	
 }

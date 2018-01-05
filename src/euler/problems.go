@@ -10,7 +10,7 @@ import (
 func CheckPrime() func(intPrime int64) (bool, *[]int64) {
 	primes := []int64{2}
 	return func(intPrime int64) (bool, *[]int64) {
-		nextPrime := primes[len(primes)-1] + 1
+		possiblePrime := primes[len(primes)-1] + 1
 		if intPrime < primes[len(primes)-1] {
 			for _, confirmedPrime := range primes {
 				if intPrime == confirmedPrime {
@@ -19,18 +19,18 @@ func CheckPrime() func(intPrime int64) (bool, *[]int64) {
 			}
 		}
 		isPrime := true
-		for nextPrime <= intPrime{
+		for possiblePrime <= intPrime{
 			isPrime = true
 			for _, confirmedPrime := range primes {
-				if nextPrime%confirmedPrime == 0 {
+				if possiblePrime%confirmedPrime == 0 {
 					isPrime = false
-					nextPrime++
+					possiblePrime++
 					break
 				}
 			}
 			if isPrime {
-				primes = append(primes, nextPrime)
-				if intPrime == nextPrime {
+				primes = append(primes, possiblePrime)
+				if intPrime == possiblePrime {
 					return true, &primes
 				}
 			}
@@ -76,12 +76,18 @@ func FibonacciSum(limit int, even interface{}) int {
 }
 
 //returns biggest prime factor for a number
-func BiggestPrimeFactor(number int) int64 {
+
+func PrimeFactor(number int) []int64 {
 	rest := int64(number)
+	fmt.Println("getting Primefactorization for ",number)
 	pc := CheckPrime()
-	factors := make([]int64, 0)
-	limit := int64(math.Sqrt(float64(number)))
-	for i := int64(3); i <= limit; i += 2 {
+	factors := make([]int64,0)	
+	
+	limit:=int64(number)
+	if limit>100{
+		limit = int64(math.Sqrt(float64(number)))
+	}
+	for i := int64(1); i <= limit; i += 2 {
 		isPrime, primeList := pc(i)
 		if isPrime {
 			for _, v := range *primeList {
@@ -89,16 +95,13 @@ func BiggestPrimeFactor(number int) int64 {
 					rest = rest / v
 					factors = append(factors, v)
 					if rest == 1 {
-						return v
+						return factors
 					}
 				}
 			}
 		}
-		if i >= limit-1 {
-			return rest
-		}
 	}
-	return 0
+	return factors
 }
 func BiggestPalindromeProduct(digits int) int64 {
 	limit := int64(1)
@@ -145,4 +148,37 @@ func SmallestMultiple(limit int64) int64 {
 		}
 	}
 	return 0
+}
+func SmallestMultipleV2(limit int) int64 {
+	factorCollection := make(map[int64]int64)
+	for i:=2; i<=limit; i++{
+		factorsI:=PrimeFactor(i)
+		factorMapI := make(map[int64]int64)
+		
+		for _,v := range factorsI {
+			_, exists := factorMapI[v]
+			if exists {
+				factorMapI[v]+=1
+			}else{
+				factorMapI[v]=1
+			}
+		}
+		for k , v := range factorMapI{
+			_, exists := factorCollection[k]
+			if exists {
+				if factorCollection[k]<factorMapI[k]{
+					factorCollection[k]=factorMapI[k]
+				}
+			}else{
+				factorCollection[k]=v
+			}			
+		}
+	}
+	sum:=int64(1)
+	for k,v	:= range factorCollection{
+		for i:=int64(1); i<=v;i++{
+			sum*=k
+		}
+	}
+	return sum
 }
