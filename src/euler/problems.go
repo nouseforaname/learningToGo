@@ -1,25 +1,43 @@
 package euler
 
 import (
+	"fmt"
 	"math"
-	"reflect"
+	"strconv"
 )
 
-type Prime int
 
-func (p *Prime) checkPrime(primes []int64) bool {
-	isPrime := true
-	intPrime := reflect.ValueOf(*p).Int()
-	primeTestLimit := math.Sqrt(float64(intPrime))
-	for _, confirmedPrime := range primes {
-		if intPrime%confirmedPrime == 0 {
-			isPrime = false
-			break
-		} else if float64(confirmedPrime) < primeTestLimit {
-			break
+func CheckPrime() func(intPrime int64) (bool, *[]int64) {
+	primes := []int64{2}
+	return func(intPrime int64) (bool, *[]int64) {
+		nextPrime := primes[len(primes)-1] + 1
+		if intPrime < primes[len(primes)-1] {
+			for _, confirmedPrime := range primes {
+				if intPrime == confirmedPrime {
+					return true, &primes
+				}
+			}
 		}
+		isPrime := true
+		for nextPrime <= intPrime{
+			isPrime = true
+			for _, confirmedPrime := range primes {
+				if nextPrime%confirmedPrime == 0 {
+					isPrime = false
+					nextPrime++
+					break
+				}
+			}
+			if isPrime {
+				primes = append(primes, nextPrime)
+				if intPrime == nextPrime {
+					return true, &primes
+				}
+			}
+		}
+		return isPrime, &primes
 	}
-	return isPrime
+
 }
 
 // calculates the sum of the multiples of a number up to limit
@@ -57,21 +75,16 @@ func FibonacciSum(limit int, even interface{}) int {
 	return sum
 }
 
-//the solution is not optimal but i can play around with interfaces, methods and pointers.. probably a closure with an anonymous
-//function will be better for calculating primes. i dont know, im learning. so lets call this the way i currently understand
+//returns biggest prime factor for a number
 func BiggestPrimeFactor(number int) int64 {
 	rest := int64(number)
-	var primes []int64
-	primes = make([]int64, 0)
-	primes = append(primes, 2)
+	pc := CheckPrime()
 	factors := make([]int64, 0)
 	limit := int64(math.Sqrt(float64(number)))
 	for i := int64(3); i <= limit; i += 2 {
-		p := Prime(i)
-		isPrime := p.checkPrime(primes)
+		isPrime, primeList := pc(i)
 		if isPrime {
-			primes = append(primes, int64(i))
-			for _, v := range primes {
+			for _, v := range *primeList {
 				if int64(rest)%v == 0 {
 					rest = rest / v
 					factors = append(factors, v)
@@ -83,6 +96,52 @@ func BiggestPrimeFactor(number int) int64 {
 		}
 		if i >= limit-1 {
 			return rest
+		}
+	}
+	return 0
+}
+func BiggestPalindromeProduct(digits int) int64 {
+	limit := int64(1)
+	for i := 1; i <= digits; i++ {
+		limit *= 10
+	}
+	biggestPalindrome := int64(0)
+	for x := limit; x > 0; x-- {
+		for y := limit; y > 99; y-- {
+
+			test := x * y
+			testString := strconv.FormatInt(test, 10)
+			palindrome := true
+			nz := len(testString) - 1
+			for z := 0; z < len(testString)/2+1; z++ {
+				if testString[z] != testString[nz] {
+					palindrome = false
+					break
+				}
+				nz--
+			}
+			if palindrome {
+				if x*y > biggestPalindrome {
+					biggestPalindrome = x * y
+				}
+
+			}
+		}
+	}
+	fmt.Println("returning ", biggestPalindrome)
+	return biggestPalindrome
+}
+func SmallestMultiple(limit int64) int64 {
+	for i := limit * (limit - 1); i != 0; i += limit * (limit - 1) {
+		noRest := true
+		for a := limit - 1; a > limit/2; a-- {
+			if i%a != 0 {
+				noRest = false
+				break
+			}
+		}
+		if noRest {
+			return int64(i)
 		}
 	}
 	return 0
